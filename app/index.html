@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Debloat Killer</title></head>
+<body style="background:#000;color:#0f0;font-family:monospace;padding:20px;">
+  <h3>Debloat Killer</h3>
+  <div id="log"></div>
+  <script>
+    const BLOCKLIST = [
+      'com.samsung.tv.AICompanionUILauncher'
+    ];
+
+    function log(msg) {
+      document.getElementById('log').innerHTML += msg + '<br>';
+    }
+
+    function killBlockedApps() {
+      if (typeof tizen === 'undefined' || !tizen.application) {
+        log('tizen.application API not available in this context.');
+        return;
+      }
+      tizen.application.getAppsContext(
+        (contexts) => {
+          log('Found ' + contexts.length + ' running apps.');
+          contexts.forEach((ctx) => {
+            if (BLOCKLIST.includes(ctx.appId)) {
+              tizen.application.kill(
+                ctx.id,
+                () => log('Killed: ' + ctx.appId),
+                (err) => log('Failed to kill ' + ctx.appId + ': ' + err.message)
+              );
+            }
+          });
+        },
+        (err) => log('getAppsContext failed: ' + err.message)
+      );
+    }
+
+    killBlockedApps();
+  </script>
+</body>
+</html> 
